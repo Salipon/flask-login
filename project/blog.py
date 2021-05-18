@@ -6,7 +6,7 @@ from flask import Blueprint
 blog = Blueprint('blog', __name__)
 
 
-@blog.route('/blog')
+@blog.route('/blog/')
 def blog_page():
     conn = get_db_connection()
     posts = conn.execute('SELECT * FROM posts').fetchall()
@@ -14,7 +14,7 @@ def blog_page():
     return render_template('blog_page.html', posts=posts)
 
 
-@blog.route('/<int:post_id>')
+@blog.route('/blog/<int:post_id>')
 def post(post_id):
     post = get_post(post_id)
     return render_template('post.html', post=post)
@@ -36,7 +36,7 @@ def get_post(post_id):
     return post
 
 
-@blog.route('/create', methods=('GET', 'POST'))
+@blog.route('/blog/create', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
         title = request.form['title']
@@ -50,12 +50,12 @@ def create():
                          (title, content))
             conn.commit()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('blog.blog_page'))
 
     return render_template('create.html')
 
 
-@blog.route('/<int:id>/edit', methods=('GET', 'POST'))
+@blog.route('/blog/<int:id>/edit', methods=('GET', 'POST'))
 def edit(id):
     post = get_post(id)
 
@@ -72,12 +72,12 @@ def edit(id):
                          (title, content, id))
             conn.commit()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('blog.blog_page'))
 
     return render_template('edit.html', post=post)
 
 
-@blog.route('/<int:id>/delete', methods=('POST',))
+@blog.route('/blog/<int:id>/delete', methods=('POST',))
 def delete(id):
     post = get_post(id)
     conn = get_db_connection()
@@ -85,4 +85,4 @@ def delete(id):
     conn.commit()
     conn.close()
     flash('"{}" was successfully deleted!'.format(post['title']))
-    return redirect(url_for('index'))
+    return redirect(url_for('blog.blog_page'))
